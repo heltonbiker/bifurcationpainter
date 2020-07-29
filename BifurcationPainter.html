@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Bifurcation Painter</title>
+  <!-- <meta name="description" content="A description."> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --margin: 20px;
+    }
+    /* body, div, canvas {
+      margin: 0;
+      padding: 0;
+    } */
+
+    html, body, #container {
+      height: 100%;
+      margin: 0;
+    }
+
+    #container {
+      background: #888;
+    }
+    
+    .row {
+      clear: both;
+    }
+    
+    .column {
+      display: inline-block;
+    }
+    
+    #left {
+      background: yellow;
+      width: var(--margin);
+    }
+    #corner {
+      height: var(--margin);
+      width: var(--margin);
+    }
+    #bottom {
+      background: green;
+      height: var(--margin);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div class="row">
+      <div id="left" class="column"></div>
+      <canvas id="canvas" class="column"></canvas>
+    </div>
+    <div class="row">
+      <div id="corner" class="column"></div>
+      <div id="bottom" class="column"></div>
+    </div>
+  </div>
+  
+  <script>
+    let canvas = document.getElementById("canvas");
+    let container = document.getElementById("container");
+    let left = document.getElementById("left");
+    let bottom = document.getElementById("bottom");
+    
+    let width = 0;
+    let height = 0;
+    let graphwidth = 0;
+    let graphheight = 0;
+    
+    let margin = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--margin'), 10);
+
+    console.log(margin);
+    
+    let sizeChanged = false;
+    
+    function render() {      
+      let w = document.documentElement.clientWidth - 10;
+      let h = document.documentElement.clientHeight - 10; // TODO: find out this is needed to prevent a vertical scrollbar
+      
+      if (w != width) {
+        width = w;
+        container.width = width;
+        graphwidth = width - margin;
+        canvas.width = graphwidth;        
+        setPixelProperty(bottom, "width", graphwidth);
+        sizeChanged = true;
+      }
+      
+      if (h != height) {
+        height = h;
+        container.height = height;
+        graphheight = height - margin;
+        canvas.height = graphheight;
+        setPixelProperty(left, "height", graphheight);
+        sizeChanged = true;
+      }
+      
+      if (sizeChanged) {
+        let cx = canvas.getContext('2d');
+        
+        cx.fillStyle = '#ddd';
+        cx.fillRect(0,0,width,height);
+        
+        cx.beginPath()
+        cx.moveTo(0, 0)
+        cx.lineTo(graphwidth, graphheight)
+        cx.moveTo(0, graphheight);
+        cx.lineTo(graphwidth, 0);
+        cx.stroke()
+      }
+    }
+
+    function setPixelProperty(element, propertyName, value) {
+      element.style[propertyName] = `${value}px`;
+      console.log("property set", element, propertyName, element[propertyName]);
+    }
+    
+    function resetFlags() {
+      sizeChanged = false;
+    }
+    
+    function loop() {
+      render();
+      resetFlags();
+      requestAnimationFrame(loop);
+    }
+    
+    loop();
+  </script>
+</body>
+
+</html>
